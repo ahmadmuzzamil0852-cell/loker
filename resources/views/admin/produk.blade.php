@@ -9,11 +9,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <h2 class="fw-bold text-success">
+
             Kelola Produk
+
         </h2>
 
         {{-- TOMBOL TAMBAH --}}
-        <a href="/admin/produk/tambah"
+        <a href="{{ route('admin.produk.tambah') }}"
            class="btn btn-success">
 
             <i class="bi bi-plus-circle me-1"></i>
@@ -24,7 +26,7 @@
 
     </div>
 
-    {{-- ALERT --}}
+    {{-- ALERT SUCCESS --}}
     @if(session('success'))
 
         <div class="alert alert-success alert-dismissible fade show">
@@ -40,107 +42,227 @@
 
     @endif
 
+    {{-- ALERT ERROR --}}
+    @if(session('error'))
+
+        <div class="alert alert-danger alert-dismissible fade show">
+
+            {{ session('error') }}
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+
+    @endif
+
     <div class="card border-0 shadow-sm">
 
         <div class="card-body">
 
-            <table class="table table-hover align-middle">
+            <div class="table-responsive">
 
-                <thead class="table-success">
+                <table class="table table-hover align-middle">
 
-                    <tr>
+                    <thead class="table-success">
 
-                        <th>ID</th>
-                        <th>Nama Produk</th>
-                        <th>Kategori</th>
-                        <th>Harga</th>
-                        <th>Stok</th>
-                        <th width="220">Aksi</th>
+                        <tr>
 
-                    </tr>
+                            <th>ID</th>
 
-                </thead>
+                            <th>Nama Produk</th>
 
-                <tbody>
+                            <th>Kategori</th>
 
-                    @foreach($produk as $p)
+                            <th>Harga</th>
 
-                    <tr>
+                            <th>Stok</th>
 
-                        <td>
+                            <th width="250">
 
-                            #{{ $p['id'] }}
+                                Aksi
 
-                        </td>
+                            </th>
 
-                        <td>
+                        </tr>
 
-                            {{ $p['nama'] }}
+                    </thead>
 
-                        </td>
+                    <tbody>
 
-                        <td>
+                        @forelse($produk as $p)
 
-                            <span class="badge bg-secondary">
+                            <tr>
 
-                                {{ $p['kategori'] }}
+                                {{-- ID --}}
+                                <td>
 
-                            </span>
+                                    #{{ $p->id }}
 
-                        </td>
+                                </td>
 
-                        <td>
+                                {{-- NAMA PRODUK --}}
+                                <td>
 
-                            Rp {{ number_format($p['harga'],0,',','.') }}
+                                    <span class="fw-semibold">
 
-                        </td>
+                                        {{ $p->nama }}
 
-                        <td>
+                                    </span>
 
-                            <span class="badge bg-success">
+                                </td>
 
-                                {{ $p['stok'] }}
+                                {{-- KATEGORI --}}
+                                <td>
 
-                            </span>
+                                    <span class="badge bg-secondary">
 
-                        </td>
+                                        {{ $p->kategori }}
 
-                        <td>
+                                    </span>
 
-                            {{-- DETAIL --}}
-                            <a href="/produk/{{ $p['id'] }}"
-                               class="btn btn-primary btn-sm">
+                                </td>
 
-                                Detail
+                                {{-- HARGA --}}
+                                <td>
 
-                            </a>
+                                    Rp {{ number_format(
+                                        $p->harga,
+                                        0,
+                                        ',',
+                                        '.'
+                                    ) }}
 
-                            {{-- EDIT --}}
-                            <a href="/edit/{{ $p['id'] }}"
-                               class="btn btn-warning btn-sm">
+                                </td>
 
-                                Edit
+                                {{-- STOK --}}
+                                <td>
 
-                            </a>
+                                    @if($p->stok > 0)
 
-                            {{-- HAPUS --}}
-                            <a href="/admin/produk/hapus/{{ $p['id'] }}"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Yakin ingin menghapus produk ini?')">
+                                        <div>
 
-                                Hapus
+                                            <span class="badge bg-success">
 
-                            </a>
+                                                Tersedia
 
-                        </td>
+                                            </span>
 
-                    </tr>
+                                        </div>
 
-                    @endforeach
+                                        <small class="text-muted">
 
-                </tbody>
+                                            {{ $p->stok }} stok
 
-            </table>
+                                        </small>
+
+                                    @else
+
+                                        <div>
+
+                                            <span class="badge bg-danger">
+
+                                                Habis
+
+                                            </span>
+
+                                        </div>
+
+                                        <small class="text-muted">
+
+                                            0 stok
+
+                                        </small>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- AKSI --}}
+                                <td>
+
+                                    <div class="d-flex gap-1 flex-wrap">
+
+                                        {{-- DETAIL --}}
+                                        <a href="{{ route(
+                                                'produk.show',
+                                                $p->id
+                                            ) }}"
+                                           class="btn btn-primary btn-sm">
+
+                                            <i class="bi bi-eye me-1"></i>
+
+                                            Detail
+
+                                        </a>
+
+                                        {{-- EDIT --}}
+                                        <a href="{{ route(
+                                                'admin.produk.edit',
+                                                $p->id
+                                            ) }}"
+                                           class="btn btn-warning btn-sm">
+
+                                            <i class="bi bi-pencil-square me-1"></i>
+
+                                            Edit
+
+                                        </a>
+
+                                        {{-- HAPUS --}}
+                                        <form action="{{ route(
+                                                    'admin.produk.hapus',
+                                                    $p->id
+                                                ) }}"
+                                              method="POST"
+                                              class="d-inline">
+
+                                            @csrf
+
+                                            @method('DELETE')
+
+                                            <button type="submit"
+                                                    class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Yakin ingin menghapus produk ini?')">
+
+                                                <i class="bi bi-trash me-1"></i>
+
+                                                Hapus
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+
+                                <td colspan="6"
+                                    class="text-center text-muted py-4">
+
+                                    <i class="bi bi-box-seam fs-3 d-block mb-2"></i>
+
+                                    Belum ada produk.
+
+                                </td>
+
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 

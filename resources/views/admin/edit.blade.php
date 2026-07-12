@@ -16,7 +16,7 @@
 
             </h2>
 
-            {{-- ALERT --}}
+            {{-- ALERT SUCCESS --}}
             @if(session('success'))
 
                 <div class="alert alert-success alert-dismissible fade show">
@@ -32,11 +32,61 @@
 
             @endif
 
+            {{-- ALERT ERROR --}}
+            @if(session('error'))
+
+                <div class="alert alert-danger alert-dismissible fade show">
+
+                    {{ session('error') }}
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+
+            @endif
+
+            {{-- VALIDATION ERROR --}}
+            @if($errors->any())
+
+                <div class="alert alert-danger">
+
+                    <h6 class="fw-bold">
+
+                        Data belum valid
+
+                    </h6>
+
+                    <ul class="mb-0">
+
+                        @foreach($errors->all() as $error)
+
+                            <li>
+
+                                {{ $error }}
+
+                            </li>
+
+                        @endforeach
+
+                    </ul>
+
+                </div>
+
+            @endif
+
             {{-- FORM EDIT --}}
-            <form action="/update/{{ $produk['id'] }}"
+            <form action="{{ route(
+                        'admin.produk.update',
+                        $produk->id
+                    ) }}"
                   method="POST">
 
                 @csrf
+
+                @method('PUT')
 
                 {{-- NAMA --}}
                 <div class="mb-3">
@@ -50,7 +100,10 @@
                     <input type="text"
                            name="nama"
                            class="form-control"
-                           value="{{ $produk['nama'] }}"
+                           value="{{ old(
+                               'nama',
+                               $produk->nama
+                           ) }}"
                            required>
 
                 </div>
@@ -67,7 +120,11 @@
                     <input type="number"
                            name="harga"
                            class="form-control"
-                           value="{{ $produk['harga'] }}"
+                           value="{{ old(
+                               'harga',
+                               $produk->harga
+                           ) }}"
+                           min="1"
                            required>
 
                 </div>
@@ -84,7 +141,10 @@
                     <input type="text"
                            name="kategori"
                            class="form-control"
-                           value="{{ $produk['kategori'] }}"
+                           value="{{ old(
+                               'kategori',
+                               $produk->kategori
+                           ) }}"
                            required>
 
                 </div>
@@ -101,8 +161,37 @@
                     <input type="text"
                            name="berat"
                            class="form-control"
-                           value="{{ $produk['berat'] }}"
+                           value="{{ old(
+                               'berat',
+                               $produk->berat
+                           ) }}">
+
+                </div>
+
+                {{-- JUMLAH STOK --}}
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+
+                        Jumlah Stok
+
+                    </label>
+
+                    <input type="number"
+                           name="stok"
+                           class="form-control"
+                           value="{{ old(
+                               'stok',
+                               $produk->stok
+                           ) }}"
+                           min="0"
                            required>
+
+                    <small class="text-muted">
+
+                        Isi 0 jika stok produk habis.
+
+                    </small>
 
                 </div>
 
@@ -117,8 +206,10 @@
 
                     <textarea name="deskripsi"
                               class="form-control"
-                              rows="4"
-                              required>{{ $produk['deskripsi'] }}</textarea>
+                              rows="4">{{ old(
+                                  'deskripsi',
+                                  $produk->deskripsi
+                              ) }}</textarea>
 
                 </div>
 
@@ -132,8 +223,10 @@
 
                 </button>
 
-                <a href="/admin/produk"
+                <a href="{{ route('admin.produk') }}"
                    class="btn btn-secondary">
+
+                    <i class="bi bi-arrow-left me-1"></i>
 
                     Kembali
 

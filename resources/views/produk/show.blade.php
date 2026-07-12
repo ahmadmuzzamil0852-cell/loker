@@ -2,7 +2,7 @@
 
 @extends('layouts.main')
 
-@section('title', $produk ? $produk['nama'] . ' – Gudang Kerinci' : 'Produk Tidak Ditemukan')
+@section('title', $produk->nama . ' – Gudang Kerinci')
 
 @section('content')
 
@@ -11,12 +11,11 @@
    class="btn btn-outline-secondary mb-4">
 
     <i class="bi bi-arrow-left me-1"></i>
-
     Kembali ke Katalog
 
 </a>
 
-{{-- ALERT --}}
+{{-- ALERT SUCCESS --}}
 @if(session('success'))
 
     <div class="alert alert-success alert-dismissible fade show">
@@ -32,7 +31,42 @@
 
 @endif
 
-@if($produk)
+{{-- ALERT ERROR --}}
+@if(session('error'))
+
+    <div class="alert alert-danger alert-dismissible fade show">
+
+        {{ session('error') }}
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+
+@endif
+
+{{-- VALIDATION ERROR --}}
+@if($errors->any())
+
+    <div class="alert alert-danger">
+
+        <b>Terjadi kesalahan:</b>
+
+        <ul class="mb-0 mt-2">
+
+            @foreach($errors->all() as $error)
+
+                <li>{{ $error }}</li>
+
+            @endforeach
+
+        </ul>
+
+    </div>
+
+@endif
 
 <div class="card border-0 shadow-sm"
      style="border-radius:14px; overflow:hidden;">
@@ -45,15 +79,15 @@
 
             <div style="font-size:3rem; line-height:1;">
 
-                @if($produk['kategori'] == 'Minuman')
+                @if($produk->kategori == 'Minuman')
 
                     <i class="bi bi-cup-hot-fill"></i>
 
-                @elseif($produk['kategori'] == 'Rempah')
+                @elseif($produk->kategori == 'Rempah')
 
                     <i class="bi bi-flower1"></i>
 
-                @elseif($produk['kategori'] == 'Kesehatan')
+                @elseif($produk->kategori == 'Kesehatan')
 
                     <i class="bi bi-heart-pulse-fill"></i>
 
@@ -69,13 +103,13 @@
 
                 <span class="badge-kategori mb-1 d-inline-block">
 
-                    {{ $produk['kategori'] }}
+                    {{ $produk->kategori }}
 
                 </span>
 
                 <h3 class="fw-bold mb-0">
 
-                    {{ $produk['nama'] }}
+                    {{ $produk->nama }}
 
                 </h3>
 
@@ -89,7 +123,10 @@
 
         <div class="row g-4">
 
-            {{-- KIRI --}}
+            {{-- ========================= --}}
+            {{-- BAGIAN KIRI --}}
+            {{-- ========================= --}}
+
             <div class="col-md-7">
 
                 <h5 class="fw-semibold text-success mb-3">
@@ -103,7 +140,7 @@
                 <p class="text-muted"
                    style="font-size:1.05rem; line-height:1.7;">
 
-                    {{ $produk['deskripsi'] }}
+                    {{ $produk->deskripsi }}
 
                 </p>
 
@@ -116,15 +153,11 @@
                         <tr>
 
                             <td width="40%" class="text-muted">
-
                                 ID Produk
-
                             </td>
 
                             <td>
-
-                                <b>#{{ $produk['id'] }}</b>
-
+                                <b>#{{ $produk->id }}</b>
                             </td>
 
                         </tr>
@@ -132,16 +165,14 @@
                         <tr>
 
                             <td class="text-muted">
-
                                 Kategori
-
                             </td>
 
                             <td>
 
                                 <span class="badge-kategori">
 
-                                    {{ $produk['kategori'] }}
+                                    {{ $produk->kategori }}
 
                                 </span>
 
@@ -152,14 +183,12 @@
                         <tr>
 
                             <td class="text-muted">
-
                                 Berat
-
                             </td>
 
                             <td>
 
-                                {{ $produk['berat'] }}
+                                {{ $produk->berat }}
 
                             </td>
 
@@ -168,18 +197,40 @@
                         <tr>
 
                             <td class="text-muted">
-
                                 Stok
-
                             </td>
 
                             <td>
 
-                                <span class="badge bg-success">
+                                @if($produk->stok > 0)
 
-                                    {{ $produk['stok'] }}
+                                    <span class="badge bg-success">
 
-                                </span>
+                                        Tersedia
+
+                                    </span>
+
+                                    <span class="ms-2 fw-semibold">
+
+                                        {{ $produk->stok }} stok
+
+                                    </span>
+
+                                @else
+
+                                    <span class="badge bg-danger">
+
+                                        Habis
+
+                                    </span>
+
+                                    <span class="ms-2 text-muted">
+
+                                        0 stok
+
+                                    </span>
+
+                                @endif
 
                             </td>
 
@@ -191,7 +242,10 @@
 
             </div>
 
-            {{-- KANAN --}}
+            {{-- ========================= --}}
+            {{-- BAGIAN KANAN --}}
+            {{-- ========================= --}}
+
             <div class="col-md-5">
 
                 <div class="card border-0 p-4 h-100"
@@ -199,151 +253,213 @@
 
                     <p class="text-muted mb-1">
 
-                        Harga
+                        Harga Satuan
 
                     </p>
 
                     <h2 class="fw-bold text-success mb-3">
 
-                        Rp {{ number_format($produk['harga'],0,',','.') }}
+                        Rp {{ number_format(
+                            $produk->harga,
+                            0,
+                            ',',
+                            '.'
+                        ) }}
 
                     </h2>
 
+                    <div class="mb-3">
+
+                        @if($produk->stok > 0)
+
+                            <span class="badge bg-success">
+
+                                <i class="bi bi-check-circle me-1"></i>
+
+                                Stok Tersedia: {{ $produk->stok }}
+
+                            </span>
+
+                        @else
+
+                            <span class="badge bg-danger">
+
+                                <i class="bi bi-x-circle me-1"></i>
+
+                                Stok Habis
+
+                            </span>
+
+                        @endif
+
+                    </div>
+
                     <hr>
 
+                    {{-- ========================= --}}
                     {{-- KHUSUS USER --}}
+                    {{-- ========================= --}}
+
                     @if(session('role') == 'user')
 
-                        {{-- ========================= --}}
-                        {{-- STATUS NEGO --}}
-                        {{-- ========================= --}}
-                        @php
+                        @if($produk->stok > 0)
 
-                            $negoUser = null;
+                            {{-- ========================= --}}
+                            {{-- FORM BELI --}}
+                            {{-- ========================= --}}
 
-                            $semuaNego = session('nego', []);
+                            <form action="{{ route('beli') }}"
+                                  method="POST"
+                                  class="mb-4">
 
-                            foreach($semuaNego as $n) {
+                                @csrf
 
-                                if(
-                                    $n['produk_id'] == $produk['id']
-                                    &&
-                                    $n['user'] == session('email')
-                                ) {
+                                <input type="hidden"
+                                       name="produk_id"
+                                       value="{{ $produk->id }}">
 
-                                    $negoUser = $n;
-                                }
-                            }
+                                <div class="mb-3">
 
-                        @endphp
+                                    <label class="form-label fw-semibold">
 
-                        @if($negoUser)
+                                        Jumlah Beli
 
-                            <div class="alert
+                                    </label>
 
-                                @if($negoUser['status'] == 'Disetujui')
+                                    <input type="number"
+                                           name="jumlah"
+                                           class="form-control"
+                                           min="1"
+                                           max="{{ $produk->stok }}"
+                                           value="{{ old('jumlah', 1) }}"
+                                           required>
 
-                                    alert-success
+                                    <small class="text-muted">
 
-                                @elseif($negoUser['status'] == 'Ditolak')
+                                        Maksimal pembelian {{ $produk->stok }} produk.
 
-                                    alert-danger
+                                    </small>
 
-                                @else
+                                </div>
 
-                                    alert-warning
+                                <button type="submit"
+                                        class="btn btn-success w-100">
 
-                                @endif
+                                    <i class="bi bi-cart-fill me-1"></i>
 
-                            ">
+                                    Beli Sekarang
 
-                                <b>Status Nego :</b>
+                                </button>
 
-                                {{ $negoUser['status'] }}
+                            </form>
+
+                            <hr>
+
+                            {{-- ========================= --}}
+                            {{-- FORM NEGO --}}
+                            {{-- ========================= --}}
+
+                            <h6 class="fw-bold text-success mb-3">
+
+                                <i class="bi bi-cash-coin me-1"></i>
+
+                                Nego Harga
+
+                            </h6>
+
+                            <form action="{{ route('nego.respon') }}"
+                                  method="POST">
+
+                                @csrf
+
+                                <input type="hidden"
+                                       name="produk_id"
+                                       value="{{ $produk->id }}">
+
+                                {{-- JUMLAH NEGO --}}
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+
+                                        Jumlah Produk
+
+                                    </label>
+
+                                    <input type="number"
+                                           name="jumlah"
+                                           class="form-control"
+                                           min="1"
+                                           max="{{ $produk->stok }}"
+                                           value="{{ old('jumlah', 1) }}"
+                                           required>
+
+                                    <small class="text-muted">
+
+                                        Maksimal nego {{ $produk->stok }} produk.
+
+                                    </small>
+
+                                </div>
+
+                                {{-- HARGA NEGO --}}
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+
+                                        Total Harga Nego
+
+                                    </label>
+
+                                    <input type="number"
+                                           name="harga"
+                                           class="form-control"
+                                           min="1"
+                                           value="{{ old('harga') }}"
+                                           placeholder="Contoh: 1000000"
+                                           required>
+
+                                    <small class="text-muted">
+
+                                        Masukkan total harga yang Anda tawarkan.
+
+                                    </small>
+
+                                </div>
+
+                                <button type="submit"
+                                        class="btn btn-outline-success w-100">
+
+                                    <i class="bi bi-send me-1"></i>
+
+                                    Ajukan Nego Harga
+
+                                </button>
+
+                            </form>
+
+                        @else
+
+                            <div class="alert alert-danger mb-0">
+
+                                <i class="bi bi-exclamation-circle me-1"></i>
+
+                                Produk sedang habis dan tidak dapat dibeli
+                                atau dinego.
 
                             </div>
 
                         @endif
 
-                        {{-- ========================= --}}
-                        {{-- FORM BELI --}}
-                        {{-- ========================= --}}
-                        <form action="/beli"
-                              method="POST"
-                              class="mt-3">
+                    @else
 
-                            @csrf
+                        <div class="alert alert-warning mb-0">
 
-                            <input type="hidden"
-                                   name="produk_id"
-                                   value="{{ $produk['id'] }}">
+                            <i class="bi bi-info-circle me-1"></i>
 
-                            <div class="mb-3">
+                            Silakan login sebagai user untuk membeli
+                            atau melakukan nego produk.
 
-                                <label class="form-label fw-semibold">
-
-                                    Jumlah Beli
-
-                                </label>
-
-                                <input type="number"
-                                       name="jumlah"
-                                       class="form-control"
-                                       min="1"
-                                       value="1"
-                                       required>
-
-                            </div>
-
-                            <button type="submit"
-                                    class="btn btn-success w-100 mb-3">
-
-                                <i class="bi bi-cart-fill me-1"></i>
-
-                                Beli Sekarang
-
-                            </button>
-
-                        </form>
-
-                        {{-- ========================= --}}
-                        {{-- FORM NEGO --}}
-                        {{-- ========================= --}}
-                        <form action="/nego/respon"
-                              method="POST">
-
-                            @csrf
-
-                            <input type="hidden"
-                                   name="produk_id"
-                                   value="{{ $produk['id'] }}">
-
-                            <div class="mb-3">
-
-                                <label class="form-label fw-semibold">
-
-                                    Ajukan Harga Nego
-
-                                </label>
-
-                                <input type="number"
-                                       name="harga"
-                                       class="form-control"
-                                       placeholder="Contoh: 50000"
-                                       required>
-
-                            </div>
-
-                            <button type="submit"
-                                    class="btn btn-outline-success w-100">
-
-                                <i class="bi bi-cash-coin me-1"></i>
-
-                                Ajukan Nego Harga
-
-                            </button>
-
-                        </form>
+                        </div>
 
                     @endif
 
@@ -356,15 +472,5 @@
     </div>
 
 </div>
-
-@else
-
-<div class="alert alert-danger">
-
-    Produk tidak ditemukan.
-
-</div>
-
-@endif
 
 @endsection

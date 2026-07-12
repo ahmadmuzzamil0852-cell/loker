@@ -3,88 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Produk;
 
 class ProductController extends Controller
 {
-    // DATA PRODUK
-    private function getProducts()
-    {
-        if(session()->has('produk')) {
-
-            return session('produk');
-
-        }
-
-        $produk = [
-
-            [
-                'id'        => 1,
-                'nama'      => 'Kayu Manis Kerinci Premium',
-                'harga'     => 85000,
-                'kategori'  => 'Rempah',
-                'deskripsi' => 'Kayu manis pilihan langsung dari perkebunan Kerinci, aroma kuat dan cita rasa tinggi.',
-                'berat'     => '250 gram',
-                'stok'      => 'Tersedia',
-            ],
-
-            [
-                'id'        => 2,
-                'nama'      => 'Teh Kayu Aro Kerinci',
-                'harga'     => 65000,
-                'kategori'  => 'Minuman',
-                'deskripsi' => 'Teh hitam premium dari perkebunan tertinggi di Asia Tenggara.',
-                'berat'     => '100 gram',
-                'stok'      => 'Tersedia',
-            ],
-
-            [
-                'id'        => 3,
-                'nama'      => 'Kopi Arabika Kerinci',
-                'harga'     => 120000,
-                'kategori'  => 'Minuman',
-                'deskripsi' => 'Kopi arabika single origin Kerinci dengan notes cokelat dan buah tropis.',
-                'berat'     => '200 gram',
-                'stok'      => 'Tersedia',
-            ],
-
-            [
-                'id'        => 4,
-                'nama'      => 'Madu Hutan Kerinci',
-                'harga'     => 150000,
-                'kategori'  => 'Kesehatan',
-                'deskripsi' => 'Madu murni hutan Kerinci tanpa campuran.',
-                'berat'     => '500 ml',
-                'stok'      => 'Tersedia',
-            ],
-
-            [
-                'id'        => 5,
-                'nama'      => 'Kentang Kerinci Organik',
-                'harga'     => 25000,
-                'kategori'  => 'Sayuran',
-                'deskripsi' => 'Kentang segar organik dari ladang dataran tinggi Kerinci.',
-                'berat'     => '1 kg',
-                'stok'      => 'Tersedia',
-            ],
-
-            [
-                'id'        => 6,
-                'nama'      => 'Cabai Merah Kerinci',
-                'harga'     => 30000,
-                'kategori'  => 'Sayuran',
-                'deskripsi' => 'Cabai merah segar berkualitas tinggi.',
-                'berat'     => '500 gram',
-                'stok'      => 'Tersedia',
-            ],
-
-        ];
-
-        session(['produk' => $produk]);
-
-        return $produk;
-    }
-
+    // =========================
     // HOME
+    // =========================
     public function home()
     {
         $namaGudang = 'Gudang Kerinci';
@@ -94,13 +19,9 @@ class ProductController extends Controller
         $visi = 'Menjadi platform terpercaya yang menghubungkan hasil bumi unggulan Kerinci dengan seluruh penjuru Indonesia.';
 
         $misi = [
-
             'Menyediakan produk asli Kerinci dengan kualitas terjamin.',
-
             'Mendukung petani lokal Kerinci melalui pemasaran digital.',
-
             'Memberikan pengalaman belanja yang mudah dan terpercaya.',
-
         ];
 
         return view(
@@ -114,10 +35,12 @@ class ProductController extends Controller
         );
     }
 
+    // =========================
     // HALAMAN KATALOG
+    // =========================
     public function index()
     {
-        $produk = $this->getProducts();
+        $produk = Produk::all();
 
         return view(
             'produk.index',
@@ -125,11 +48,12 @@ class ProductController extends Controller
         );
     }
 
-    // HALAMAN DETAIL
+    // =========================
+    // HALAMAN DETAIL PRODUK
+    // =========================
     public function show($id)
     {
-        $produk = collect($this->getProducts())
-                    ->firstWhere('id', $id);
+        $produk = Produk::findOrFail($id);
 
         return view(
             'produk.show',
@@ -137,10 +61,12 @@ class ProductController extends Controller
         );
     }
 
-    // HALAMAN ADMIN
+    // =========================
+    // HALAMAN ADMIN PRODUK
+    // =========================
     public function admin()
     {
-        $produk = $this->getProducts();
+        $produk = Produk::all();
 
         return view(
             'admin.produk',
@@ -148,48 +74,75 @@ class ProductController extends Controller
         );
     }
 
+    // =========================
     // FORM TAMBAH PRODUK
+    // =========================
     public function formTambah()
     {
         return view('admin.tambah');
     }
 
+    // =========================
     // SIMPAN PRODUK
+    // =========================
     public function simpan(Request $request)
     {
-        $produk = $this->getProducts();
+        $request->validate(
+            [
+                'nama' => 'required|string|max:255',
+                'harga' => 'required|numeric|min:1',
+                'kategori' => 'required|string|max:255',
+                'deskripsi' => 'nullable|string',
+                'berat' => 'nullable|string|max:255',
+                'stok' => 'required|integer|min:0',
+            ],
+            [
+                'nama.required' => 'Nama produk wajib diisi.',
+                'nama.string' => 'Nama produk harus berupa teks.',
+                'nama.max' => 'Nama produk maksimal 255 karakter.',
 
-        $produk[] = [
+                'harga.required' => 'Harga produk wajib diisi.',
+                'harga.numeric' => 'Harga produk harus berupa angka.',
+                'harga.min' => 'Harga produk minimal Rp1.',
 
-            'id'        => count($produk) + 1,
+                'kategori.required' => 'Kategori produk wajib diisi.',
+                'kategori.string' => 'Kategori harus berupa teks.',
+                'kategori.max' => 'Kategori maksimal 255 karakter.',
 
-            'nama'      => $request->nama,
+                'deskripsi.string' => 'Deskripsi harus berupa teks.',
 
-            'harga'     => $request->harga,
+                'berat.string' => 'Berat harus berupa teks.',
+                'berat.max' => 'Berat maksimal 255 karakter.',
 
-            'kategori'  => $request->kategori,
-
-            'deskripsi' => $request->deskripsi ?? '-',
-
-            'berat'     => $request->berat ?? '-',
-
-            'stok'      => 'Tersedia',
-
-        ];
-
-        session(['produk' => $produk]);
-
-        return redirect('/admin/produk')->with(
-            'success',
-            'Produk berhasil ditambahkan'
+                'stok.required' => 'Jumlah stok wajib diisi.',
+                'stok.integer' => 'Jumlah stok harus berupa angka bulat.',
+                'stok.min' => 'Jumlah stok tidak boleh kurang dari 0.',
+            ]
         );
+
+        Produk::create([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'kategori' => $request->kategori,
+            'deskripsi' => $request->deskripsi ?? '-',
+            'berat' => $request->berat ?? '-',
+            'stok' => $request->stok,
+        ]);
+
+        return redirect()
+            ->route('admin.produk')
+            ->with(
+                'success',
+                'Produk berhasil ditambahkan ke database'
+            );
     }
 
-    // FORM EDIT
+    // =========================
+    // FORM EDIT PRODUK
+    // =========================
     public function edit($id)
     {
-        $produk = collect($this->getProducts())
-                    ->firstWhere('id', $id);
+        $produk = Produk::findOrFail($id);
 
         return view(
             'admin.edit',
@@ -197,57 +150,77 @@ class ProductController extends Controller
         );
     }
 
+    // =========================
     // UPDATE PRODUK
+    // =========================
     public function update(Request $request, $id)
     {
-        $produk = $this->getProducts();
+        $request->validate(
+            [
+                'nama' => 'required|string|max:255',
+                'harga' => 'required|numeric|min:1',
+                'kategori' => 'required|string|max:255',
+                'deskripsi' => 'nullable|string',
+                'berat' => 'nullable|string|max:255',
+                'stok' => 'required|integer|min:0',
+            ],
+            [
+                'nama.required' => 'Nama produk wajib diisi.',
+                'nama.string' => 'Nama produk harus berupa teks.',
+                'nama.max' => 'Nama produk maksimal 255 karakter.',
 
-        foreach($produk as $key => $item) {
+                'harga.required' => 'Harga produk wajib diisi.',
+                'harga.numeric' => 'Harga produk harus berupa angka.',
+                'harga.min' => 'Harga produk minimal Rp1.',
 
-            if($item['id'] == $id) {
+                'kategori.required' => 'Kategori produk wajib diisi.',
+                'kategori.string' => 'Kategori harus berupa teks.',
+                'kategori.max' => 'Kategori maksimal 255 karakter.',
 
-                $produk[$key]['nama'] = $request->nama;
+                'deskripsi.string' => 'Deskripsi harus berupa teks.',
 
-                $produk[$key]['harga'] = $request->harga;
+                'berat.string' => 'Berat harus berupa teks.',
+                'berat.max' => 'Berat maksimal 255 karakter.',
 
-                $produk[$key]['kategori'] = $request->kategori;
-
-                $produk[$key]['berat'] = $request->berat;
-
-                $produk[$key]['deskripsi'] = $request->deskripsi;
-
-            }
-        }
-
-        session(['produk' => $produk]);
-
-        return redirect('/admin/produk')->with(
-            'success',
-            'Produk berhasil diupdate'
+                'stok.required' => 'Jumlah stok wajib diisi.',
+                'stok.integer' => 'Jumlah stok harus berupa angka bulat.',
+                'stok.min' => 'Jumlah stok tidak boleh kurang dari 0.',
+            ]
         );
+
+        $produk = Produk::findOrFail($id);
+
+        $produk->update([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'kategori' => $request->kategori,
+            'berat' => $request->berat ?? '-',
+            'deskripsi' => $request->deskripsi ?? '-',
+            'stok' => $request->stok,
+        ]);
+
+        return redirect()
+            ->route('admin.produk')
+            ->with(
+                'success',
+                'Produk berhasil diupdate di database'
+            );
     }
 
+    // =========================
     // HAPUS PRODUK
+    // =========================
     public function hapus($id)
     {
-        $produk = $this->getProducts();
+        $produk = Produk::findOrFail($id);
 
-        $hasil = [];
+        $produk->delete();
 
-        foreach($produk as $item) {
-
-            if($item['id'] != $id) {
-
-                $hasil[] = $item;
-
-            }
-        }
-
-        session(['produk' => $hasil]);
-
-        return redirect('/admin/produk')->with(
-            'success',
-            'Produk berhasil dihapus'
-        );
+        return redirect()
+            ->route('admin.produk')
+            ->with(
+                'success',
+                'Produk berhasil dihapus dari database'
+            );
     }
 }

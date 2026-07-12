@@ -65,6 +65,18 @@
             border-radius:20px;
         }
 
+        .btn-logout{
+            background:none;
+            border:none;
+            padding:8px;
+            color:white!important;
+            font-weight:500;
+        }
+
+        .btn-logout:hover{
+            opacity:.8;
+        }
+
         footer{
             background:#2d6a2d;
             color:white;
@@ -131,12 +143,13 @@
                 {{-- ========================= --}}
                 {{-- MENU KHUSUS USER --}}
                 {{-- ========================= --}}
+
                 @if(session('role') == 'user')
 
                     <li class="nav-item">
 
                         <a class="nav-link"
-                           href="/transaksi">
+                           href="{{ route('transaksi') }}">
 
                             Transaksi Saya
 
@@ -149,13 +162,14 @@
                 {{-- ========================= --}}
                 {{-- MENU KHUSUS ADMIN --}}
                 {{-- ========================= --}}
+
                 @if(session('role') == 'admin')
 
                     {{-- KELOLA PRODUK --}}
                     <li class="nav-item">
 
                         <a class="nav-link"
-                           href="/admin/produk">
+                           href="{{ route('admin.produk') }}">
 
                             Kelola Produk
 
@@ -167,7 +181,7 @@
                     <li class="nav-item">
 
                         <a class="nav-link"
-                           href="/nego">
+                           href="{{ route('nego.index') }}">
 
                             Kelola Nego
 
@@ -179,9 +193,23 @@
                     <li class="nav-item">
 
                         <a class="nav-link"
-                           href="/admin/transaksi">
+                           href="{{ route('admin.transaksi') }}">
 
                             Data Transaksi
+
+                        </a>
+
+                    </li>
+
+                    {{-- LAPORAN --}}
+                    <li class="nav-item">
+
+                        <a class="nav-link"
+                           href="{{ route('admin.laporan') }}">
+
+                            <i class="bi bi-file-earmark-bar-graph me-1"></i>
+
+                            Laporan
 
                         </a>
 
@@ -190,8 +218,9 @@
                 @endif
 
                 {{-- ========================= --}}
-                {{-- LOGIN --}}
+                {{-- LOGIN DAN LOGOUT --}}
                 {{-- ========================= --}}
+
                 @if(session('login'))
 
                     <li class="nav-item">
@@ -205,14 +234,25 @@
 
                     </li>
 
+                    {{-- LOGOUT POST --}}
                     <li class="nav-item">
 
-                        <a class="nav-link"
-                           href="{{ route('logout') }}">
+                        <form action="{{ route('logout') }}"
+                              method="POST"
+                              class="m-0">
 
-                            Logout
+                            @csrf
 
-                        </a>
+                            <button type="submit"
+                                    class="btn-logout">
+
+                                <i class="bi bi-box-arrow-right me-1"></i>
+
+                                Logout
+
+                            </button>
+
+                        </form>
 
                     </li>
 
@@ -266,4 +306,5 @@
 @yield('scripts')
 
 </body>
+
 </html>
